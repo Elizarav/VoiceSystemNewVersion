@@ -1,7 +1,7 @@
 package com.example.voicesystemnewversion
 
 import android.annotation.SuppressLint
-import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
@@ -12,7 +12,6 @@ import android.widget.Chronometer
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-
 
 
 class MainActivity : AppCompatActivity() {
@@ -44,14 +43,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var lookTimeTV: TextView
 
-    var currentTime: Long = 0
 
     val timeList = ArrayList<Long>()
     var timeListAfterConvertMil = ArrayList<Long>()
-    var currentTimeList = ArrayList<Long>()
 
     var originalTimeList = ArrayList<String>()
     var originalCourseList = ArrayList<String>()
+
+    var currentCourse = "0"
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
@@ -87,6 +86,7 @@ class MainActivity : AppCompatActivity() {
         onClick()
     }
 
+
     private fun init() {
         numberTV = findViewById(R.id.numberTV)
         courseTV = findViewById(R.id.courseTV)
@@ -110,13 +110,14 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun onClick() {
-        var index = 0
+    private fun onClick(): String {
+        var tempCourse = originalCourseList[0]
+        var resultCourse = "0"
+
         removeAndAddElementTimeList()
 
         startBTN.setOnClickListener {
 
-            val tempCourse = originalCourseList[0]
             lookTimeTV.text = tempCourse
             chronometer.base = SystemClock.elapsedRealtime()
             chronometer.start()
@@ -127,7 +128,7 @@ class MainActivity : AppCompatActivity() {
             val courseList = originalCourseList
 
 
-            RepeatHelper.repeatDelayed(1000) {
+            RepeatHelper.repeatDelayed(3000) {
                 addToList(
                     timeList,
                     SystemClock.elapsedRealtime() - chronometer.base
@@ -135,16 +136,16 @@ class MainActivity : AppCompatActivity() {
             }
 
             RepeatHelper.repeatSpecifyTheCourseSpecifyTheCourse(
-                1200
+                3000
             ) {
-                index = specifyTheCourse(
+                tempCourse = specifyTheCourse(
                     currentTempList,
                     timeListConvert,
                     courseList,
-                    index
                 )
             }
         }
+        resultCourse = tempCourse
 
         stopBTN.setOnClickListener {
             chronometer.stop()
@@ -153,6 +154,7 @@ class MainActivity : AppCompatActivity() {
             lookTimeTV.text = ""
 
         }
+        return resultCourse
     }
 
     private fun removeAndAddElementTimeList() {
@@ -236,28 +238,36 @@ class MainActivity : AppCompatActivity() {
         timeList: ArrayList<Long>,
         timeListAfterConvertMil: ArrayList<Long>,
         originalCourseList: ArrayList<String>,
-        index: Int
-    ): Int {
-        var tempIndex = 1
+    ): String {
+        var resultCourse = originalCourseList[0]
+        var current = resultCourse
+        var count = 0
         if (timeListAfterConvertMil.isNotEmpty()) {
             if (timeListAfterConvertMil[0] <= timeList[0]) {
                 originalCourseList.removeAt(0)
                 if (originalCourseList.isEmpty()) {
                     lookTimeTV.text = "256"
                 } else {
+                    count = 0
                     lookTimeTV.text = originalCourseList[0]
-                    val list = VoicePlayer.createPlayList(lookTimeTV.text.toString())
-                    VoicePlayer.play(this, list)
+                    count++
+                    if (count == 1) {
+                        resultCourse = lookTimeTV.text.toString()
+                    }
                 }
                 timeList.clear()
                 timeListAfterConvertMil.removeAt(0)
-                tempIndex++
             } else {
                 timeList.clear()
 
             }
         }
-        return tempIndex
+        if (resultCourse != current) {
+            val intent = Intent(this, CourseActivity::class.java)
+            intent.putExtra("Key_course", resultCourse)
+            startActivity(intent)
+        }
+        return resultCourse
     }
 }
 

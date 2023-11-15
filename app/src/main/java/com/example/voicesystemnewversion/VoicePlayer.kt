@@ -3,6 +3,9 @@ package com.example.voicesystemnewversion
 import android.content.Context
 import android.media.MediaPlayer
 import androidx.core.os.postDelayed
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.logging.Handler
 
 class VoicePlayer {
@@ -12,6 +15,8 @@ class VoicePlayer {
 
         private fun chooseHundredVoiceOption(course: String): Int {
             val hundred = when (course.toInt() / 100) {
+                1 -> R.raw.onehundred
+                2 -> R.raw.twohundred
                 3 -> R.raw.threehundred
                 else -> 0
 
@@ -22,6 +27,9 @@ class VoicePlayer {
         private fun chooseDozensVoiceOption(course: String): Int {
             val dozens = when (course.toInt() / 10 % 10) {
                 4 -> R.raw.forty
+                5 -> R.raw.fifty
+                6 -> R.raw.sixty
+                7 -> R.raw.seventeen
                 else -> 0
             }
             return dozens
@@ -37,49 +45,51 @@ class VoicePlayer {
 
         fun createPlayList(course: String): ArrayList<Int> {
             val list = ArrayList<Int>()
-            val hundred = chooseHundredVoiceOption(course)
+            if (course.length > 2) {
+                val hundred = chooseHundredVoiceOption(course)
+                list.add(hundred)
+            }
             val dozens = chooseDozensVoiceOption(course)
             val unit = chooseUnitVoiceOption(course)
-            val pause = R.raw.paused
-            list.add(hundred)
-            list.add(pause)
+            list.add(R.raw.paused)
             list.add(dozens)
-            list.add(pause)
+            list.add(R.raw.paused)
             list.add(unit)
             return list
         }
 
         fun play(
             context: Context,
-            list: ArrayList<Int>
-        ) {
-            var mediaPlayer: MediaPlayer
-
-            if (list.isEmpty()) {
-                return
+            item: Int
+        ) = runBlocking {
+            launch {
+                val mediaPlayer = MediaPlayer.create(context, item)
+                delay(300)
+                mediaPlayer.start()
             }
-            val item = list[0]
-            mediaPlayer = MediaPlayer.create(context, item)
-            mediaPlayer.start()
-            Thread.sleep(300)
+
         }
+
     }
 }
 
-//    object Repeat {
-//        private val handler = android.os.Handler()
-//        fun play(
-//            course: String,
-//            context: Context
-//        ) {
-//            val list = VoicePlayer.createPlayList(course)
-//            for (i in list.indices) {
-//                val item = list[i]
-//                val mediaPlayer = MediaPlayer.create(context, item)
-//
-//                handler.postDelayed({
-//                    mediaPlayer.start()
-//                }, 1000)
-//            }
-//        }
-//    }
+fun stop() {
+
+}
+
+object Repeat {
+    private val handler = android.os.Handler()
+    fun play(
+        list: ArrayList<Int>,
+        context: Context
+    ) {
+        for (i in list.indices) {
+            val item = list[i]
+            val mediaPlayer = MediaPlayer.create(context, item)
+
+            handler.postDelayed({
+                mediaPlayer.start()
+            }, 5000)
+        }
+    }
+}
