@@ -2,11 +2,9 @@ package com.example.voicesystemnewversion
 
 import android.content.Context
 import android.media.MediaPlayer
-import androidx.core.os.postDelayed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.util.logging.Handler
 
 class VoicePlayer {
 
@@ -26,18 +24,56 @@ class VoicePlayer {
 
         private fun chooseDozensVoiceOption(course: String): Int {
             val dozens = when (course.toInt() / 10 % 10) {
-                4 -> R.raw.forty
+                1 -> R.raw.ten
+                2 -> R.raw.twenty
+                3 -> R.raw.thirty
+                4 -> R.raw.fourty
                 5 -> R.raw.fifty
                 6 -> R.raw.sixty
-                7 -> R.raw.seventeen
+                7 -> R.raw.seventy
+                8 -> R.raw.eighty
+                9 -> R.raw.ninety
                 else -> 0
             }
             return dozens
         }
 
+        private fun checkDozen(course: String): Boolean {
+            var dozen = course.toInt() / 10 % 10
+            return dozen in 11..19
+        }
+
+        private fun chooseOneDozen(course: String): Int {
+            var result = 0
+            var dozen = course.toInt() / 10 % 10
+            if (dozen in 11..19) {
+                result = when (dozen) {
+                    11 -> R.raw.eleven
+                    12 -> R.raw.twelve
+                    13 -> R.raw.thirteen
+                    14 -> R.raw.fourteen
+                    15 -> R.raw.fifteen
+                    16 -> R.raw.sixteen
+                    17 -> R.raw.seventeen
+                    18 -> R.raw.eighteen
+                    19 -> R.raw.nineteen
+                    else -> 0
+                }
+            }
+            return result
+        }
+
         private fun chooseUnitVoiceOption(course: String): Int {
             val unit = when (course.toInt() % 10) {
+                1 -> R.raw.one
+                2 -> R.raw.two
+                3 -> R.raw.three
+                4 -> R.raw.four
+                5 -> R.raw.five
                 6 -> R.raw.six
+                7 -> R.raw.seven
+                8 -> R.raw.eight
+                9 -> R.raw.nine
                 else -> 0
             }
             return unit
@@ -49,12 +85,17 @@ class VoicePlayer {
                 val hundred = chooseHundredVoiceOption(course)
                 list.add(hundred)
             }
-            val dozens = chooseDozensVoiceOption(course)
+//            if (checkDozen(course)) {
+//                val oneDozen = chooseOneDozen(course)
+//                list.add(oneDozen)
+//            } else {
+            val dozen = chooseDozensVoiceOption(course)
             val unit = chooseUnitVoiceOption(course)
             list.add(R.raw.paused)
-            list.add(dozens)
+            list.add(dozen)
             list.add(R.raw.paused)
             list.add(unit)
+//            }
             return list
         }
 
@@ -64,7 +105,7 @@ class VoicePlayer {
         ) = runBlocking {
             launch {
                 val mediaPlayer = MediaPlayer.create(context, item)
-                delay(300)
+                delay(600)
                 mediaPlayer.start()
             }
 

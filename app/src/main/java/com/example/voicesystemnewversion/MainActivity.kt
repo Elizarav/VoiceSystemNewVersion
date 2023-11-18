@@ -12,17 +12,17 @@ import android.widget.Chronometer
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import org.w3c.dom.Text
 
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
         const val TIME_FACTOR = 1000
-        const val TIME_FLY = 50000
+        const val TIME_FLY = 900000
     }
 
     private lateinit var chronometer: Chronometer
-    private lateinit var mediaPlayer: MediaPlayer
 
     private lateinit var numberTV: TextView
     private lateinit var courseTV: TextView
@@ -42,6 +42,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var stopBTN: Button
 
     private lateinit var lookTimeTV: TextView
+    private lateinit var numberOfFlightsTV: TextView
+    private lateinit var countOfFlightsTV: TextView
 
 
     val timeList = ArrayList<Long>()
@@ -51,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     var originalCourseList = ArrayList<String>()
 
     var currentCourse = "0"
+    var countFlight = 0
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
@@ -105,6 +108,8 @@ class MainActivity : AppCompatActivity() {
         startBTN = findViewById(R.id.startTimeBTN)
         stopBTN = findViewById(R.id.stopTimeBTN)
         lookTimeTV = findViewById(R.id.lookTimeTV)
+        numberOfFlightsTV = findViewById(R.id.numberOfFlightsTV)
+        countOfFlightsTV = findViewById(R.id.countOfFlightsTV)
 
         chronometer = findViewById(R.id.chronometer)
     }
@@ -118,9 +123,13 @@ class MainActivity : AppCompatActivity() {
 
         startBTN.setOnClickListener {
 
+            countFlight++
+            countOfFlightsTV.text = countFlight.toString()
             lookTimeTV.text = tempCourse
             chronometer.base = SystemClock.elapsedRealtime()
             chronometer.start()
+
+
 
             timeListAfterConvertMil = convertToTimeMillis(originalTimeList)
             val timeListConvert = timeListAfterConvertMil

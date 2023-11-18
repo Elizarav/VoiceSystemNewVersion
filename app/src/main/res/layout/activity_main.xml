@@ -39,7 +39,7 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:padding="4dp"
-            android:text="0.15"
+            android:text="1.30"
             android:textColor="@color/black"
             android:textSize="22sp" />
 
@@ -87,7 +87,7 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:padding="4dp"
-            android:text="0.25"
+            android:text="2.20"
             android:textColor="@color/black"
             android:textSize="22sp" />
 
@@ -135,7 +135,7 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:padding="4dp"
-            android:text="0.30"
+            android:text="5.20"
             android:textColor="@color/black"
             android:textSize="22sp" />
 
@@ -184,7 +184,7 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:padding="4dp"
-            android:text="0.25"
+            android:text="0.50"
             android:textColor="@color/black"
             android:textSize="22sp" />
 
@@ -232,7 +232,7 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:padding="4dp"
-            android:text="0.30"
+            android:text="2.40"
             android:textColor="@color/black"
             android:textSize="22sp" />
 
@@ -261,6 +261,7 @@
             android:layout_margin="4dp"
             android:padding="8dp"
             android:text="Старт" />
+
         <Button
             android:id="@+id/stopTimeBTN"
             android:layout_width="wrap_content"
@@ -279,9 +280,36 @@
         android:id="@+id/lookTimeTV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Время"
+        android:layout_margin="16dp"
         android:gravity="center"
-        android:textSize="22sp"
-        android:layout_margin="16dp"/>
+        android:text="Время"
+        android:textSize="22sp" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="16dp"
+        android:padding="4dp">
+
+        <TextView
+            android:id="@+id/numberOfFlightsTV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:gravity="center"
+            android:text="Количество полетов:"
+            android:textSize="22sp" />
+        <TextView
+            android:id="@+id/countOfFlightsTV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="22sp" />
+
+    </LinearLayout>
 
 </LinearLayout>
