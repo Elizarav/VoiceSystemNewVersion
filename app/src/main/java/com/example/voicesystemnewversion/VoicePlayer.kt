@@ -39,15 +39,12 @@ class VoicePlayer {
         }
 
         private fun checkDozen(course: String): Boolean {
-            var dozen = course.toInt() / 10 % 10
+            var dozen = course.toInt() % 100
             return dozen in 11..19
         }
 
         private fun chooseOneDozen(course: String): Int {
-            var result = 0
-            var dozen = course.toInt() / 10 % 10
-            if (dozen in 11..19) {
-                result = when (dozen) {
+                var result = when (course.toInt() % 100) {
                     11 -> R.raw.eleven
                     12 -> R.raw.twelve
                     13 -> R.raw.thirteen
@@ -58,7 +55,6 @@ class VoicePlayer {
                     18 -> R.raw.eighteen
                     19 -> R.raw.nineteen
                     else -> 0
-                }
             }
             return result
         }
@@ -85,17 +81,17 @@ class VoicePlayer {
                 val hundred = chooseHundredVoiceOption(course)
                 list.add(hundred)
             }
-//            if (checkDozen(course)) {
-//                val oneDozen = chooseOneDozen(course)
-//                list.add(oneDozen)
-//            } else {
+            if (checkDozen(course)) {
+                val oneDozen = chooseOneDozen(course)
+                list.add(oneDozen)
+            } else {
             val dozen = chooseDozensVoiceOption(course)
             val unit = chooseUnitVoiceOption(course)
             list.add(R.raw.paused)
             list.add(dozen)
             list.add(R.raw.paused)
             list.add(unit)
-//            }
+            }
             return list
         }
 
@@ -105,7 +101,7 @@ class VoicePlayer {
         ) = runBlocking {
             launch {
                 val mediaPlayer = MediaPlayer.create(context, item)
-                delay(600)
+                delay(400)
                 mediaPlayer.start()
             }
 
