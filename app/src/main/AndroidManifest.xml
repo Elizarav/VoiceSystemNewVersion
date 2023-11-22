@@ -23,7 +23,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.voicesystemnewversion.CourseActivity" />
+        <activity android:name="com.example.voicesystemnewversion.CreateVoiceActivity" />
+        <activity android:name="com.example.voicesystemnewversion.CreateTimeVoiceActivity" />
     </application>
 
 </manifest>

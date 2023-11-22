@@ -9,14 +9,12 @@ import kotlinx.coroutines.runBlocking
 class VoicePlayer {
 
     companion object {
-
-
         private fun chooseHundredVoiceOption(course: String): Int {
             val hundred = when (course.toInt() / 100) {
                 1 -> R.raw.onehundred
                 2 -> R.raw.twohundred
                 3 -> R.raw.threehundred
-                else -> 0
+                else -> R.raw.paused
 
             }
             return hundred
@@ -33,7 +31,7 @@ class VoicePlayer {
                 7 -> R.raw.seventy
                 8 -> R.raw.eighty
                 9 -> R.raw.ninety
-                else -> 0
+                else -> R.raw.pausedsmall
             }
             return dozens
         }
@@ -44,17 +42,17 @@ class VoicePlayer {
         }
 
         private fun chooseOneDozen(course: String): Int {
-                var result = when (course.toInt() % 100) {
-                    11 -> R.raw.eleven
-                    12 -> R.raw.twelve
-                    13 -> R.raw.thirteen
-                    14 -> R.raw.fourteen
-                    15 -> R.raw.fifteen
-                    16 -> R.raw.sixteen
-                    17 -> R.raw.seventeen
-                    18 -> R.raw.eighteen
-                    19 -> R.raw.nineteen
-                    else -> 0
+            var result = when (course.toInt() % 100) {
+                11 -> R.raw.eleven
+                12 -> R.raw.twelve
+                13 -> R.raw.thirteen
+                14 -> R.raw.fourteen
+                15 -> R.raw.fifteen
+                16 -> R.raw.sixteen
+                17 -> R.raw.seventeen
+                18 -> R.raw.eighteen
+                19 -> R.raw.nineteen
+                else -> R.raw.pausedsmall
             }
             return result
         }
@@ -70,27 +68,113 @@ class VoicePlayer {
                 7 -> R.raw.seven
                 8 -> R.raw.eight
                 9 -> R.raw.nine
-                else -> 0
+                else -> R.raw.pausedsmall
             }
             return unit
         }
 
-        fun createPlayList(course: String): ArrayList<Int> {
+        fun createCoursePlayList(course: String): ArrayList<Int> {
             val list = ArrayList<Int>()
+            list.add(R.raw.course)
+//            list.add(R.raw.paused)
             if (course.length > 2) {
                 val hundred = chooseHundredVoiceOption(course)
                 list.add(hundred)
+
             }
             if (checkDozen(course)) {
                 val oneDozen = chooseOneDozen(course)
                 list.add(oneDozen)
             } else {
-            val dozen = chooseDozensVoiceOption(course)
-            val unit = chooseUnitVoiceOption(course)
+                val dozen = chooseDozensVoiceOption(course)
+                val unit = chooseUnitVoiceOption(course)
+//                list.add(R.raw.paused)
+                list.add(dozen)
+//                list.add(R.raw.paused)
+                list.add(unit)
+
+            }
+            return list
+        }
+
+        fun createBearingPlayList(bearing: String): ArrayList<Int> {
+            val list = ArrayList<Int>()
+            list.add(R.raw.mpr)
+//            list.add(R.raw.paused)
             list.add(R.raw.paused)
-            list.add(dozen)
-            list.add(R.raw.paused)
-            list.add(unit)
+            if (bearing.length > 2) {
+                val hundred = chooseHundredVoiceOption(bearing)
+                list.add(hundred)
+            }
+            if (checkDozen(bearing)) {
+                val oneDozen = chooseOneDozen(bearing)
+                list.add(oneDozen)
+            } else {
+                val dozen = chooseDozensVoiceOption(bearing)
+                val unit = chooseUnitVoiceOption(bearing)
+//                list.add(R.raw.paused)
+                list.add(dozen)
+//                list.add(R.raw.paused)
+                list.add(unit)
+            }
+            return list
+        }
+
+        private fun convertStringTimeWithoutDot(time: String): String {
+            val builder = StringBuilder()
+            val charTime = time.toCharArray()
+            for (i in charTime.indices) {
+                if (charTime[i] == '.') continue
+                builder.append(charTime[i])
+            }
+            return builder.toString()
+        }
+
+        fun isTime(current: String): Boolean {
+            val cars = current.toCharArray()
+            for (i in cars.indices) {
+                if (cars[i] == '.') {
+                    return true
+                    break
+                }
+            }
+            return false
+        }
+
+        fun createTimePlayList(time: String): ArrayList<Int> {
+            val list = ArrayList<Int>()
+            list.add(R.raw.traverse)
+
+            var timeString = convertStringTimeWithoutDot(time)
+            val result = when (chooseHundredVoiceOption(timeString)) {
+                1 -> R.raw.oneminute
+                2 -> R.raw.twominute
+                3 -> R.raw.threeminute
+                4 -> R.raw.fourminute
+                5 -> R.raw.fiveminute
+                else -> R.raw.paused
+            }
+            list.add(result)
+            if (checkDozen(timeString)) {
+                val oneDozen = chooseOneDozen(timeString)
+                list.add(oneDozen)
+                list.add(R.raw.second)
+            } else {
+                val dozen = chooseDozensVoiceOption(timeString)
+                list.add(dozen)
+//                list.add(R.raw.paused)
+                val unit = chooseUnitVoiceOption(timeString)
+                if (unit != R.raw.paused) {
+                    list.add(unit)
+//                    list.add(R.raw.paused)
+                }
+
+                val ending = when (unit) {
+                    2, 3, 4 -> R.raw.secondtwo
+                    0, 5, 6, 7, 8, 9 -> R.raw.second
+                    else -> R.raw.onesecond
+                }
+                list.add(ending)
             }
             return list
         }
@@ -101,17 +185,13 @@ class VoicePlayer {
         ) = runBlocking {
             launch {
                 val mediaPlayer = MediaPlayer.create(context, item)
-                delay(400)
+                delay(600)
                 mediaPlayer.start()
             }
 
         }
 
     }
-}
-
-fun stop() {
-
 }
 
 object Repeat {

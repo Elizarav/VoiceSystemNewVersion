@@ -12,7 +12,6 @@ import android.widget.Chronometer
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import org.w3c.dom.Text
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,7 +35,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var timeTV3: TextView
     private lateinit var timeTVtr: TextView
     private lateinit var timeTV4: TextView
+
     private lateinit var bearingTV: TextView
+    private lateinit var bearingTV2: TextView
+    private lateinit var bearingTVtr: TextView
+    private lateinit var bearingTV3: TextView
+    private lateinit var bearingTV4: TextView
 
     private lateinit var startBTN: Button
     private lateinit var stopBTN: Button
@@ -46,14 +50,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var countOfFlightsTV: TextView
 
 
-    val timeList = ArrayList<Long>()
-    var timeListAfterConvertMil = ArrayList<Long>()
+    private val timeList = ArrayList<Long>()
+    private var timeListAfterConvertMil = ArrayList<Long>()
+    private val timeListForTime = ArrayList<Long>()
 
-    var originalTimeList = ArrayList<String>()
-    var originalCourseList = ArrayList<String>()
+    private var originalTimeList = ArrayList<String>()
+    private var originalCourseList = ArrayList<String>()
+    private var originalBearingList = ArrayList<String>()
 
     var currentCourse = "0"
-    var countFlight = 0
+    private var countFlight = 0
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
@@ -86,6 +92,13 @@ class MainActivity : AppCompatActivity() {
             "12.00"
         ) as ArrayList<String>
 
+        originalBearingList = mutableListOf(
+            bearingTV2.text.toString(),
+            bearingTVtr.text.toString(),
+            bearingTV3.text.toString(),
+            bearingTV4.text.toString()
+        ) as ArrayList<String>
+
         onClick()
     }
 
@@ -103,7 +116,12 @@ class MainActivity : AppCompatActivity() {
         timeTV3 = findViewById(R.id.timeTV3)
         timeTVtr = findViewById(R.id.timeTVtr)
         timeTV4 = findViewById(R.id.timeTV4)
+
         bearingTV = findViewById(R.id.bearingTV)
+        bearingTV2 = findViewById(R.id.bearingTV2)
+        bearingTVtr = findViewById(R.id.bearingTVtr)
+        bearingTV3 = findViewById(R.id.bearingTV3)
+        bearingTV4 = findViewById(R.id.bearingTV4)
 
         startBTN = findViewById(R.id.startTimeBTN)
         stopBTN = findViewById(R.id.stopTimeBTN)
@@ -129,15 +147,17 @@ class MainActivity : AppCompatActivity() {
             chronometer.base = SystemClock.elapsedRealtime()
             chronometer.start()
 
-
-
             timeListAfterConvertMil = convertToTimeMillis(originalTimeList)
             val timeListConvert = timeListAfterConvertMil
             val currentTempList = timeList
             val courseList = originalCourseList
+            val bearingList = originalBearingList
 
-
-            RepeatHelper.repeatDelayed(3000) {
+            val traverseCurrentTime = timeListAfterConvertMil[2]
+            val traverseTime = timeTV3.text.toString()
+            var equalsCourseForTraverse = courseList[3]
+//---------------------------------------------------------------------------------------
+            RepeatHelper.repeatDelayed(2000) {
                 addToList(
                     timeList,
                     SystemClock.elapsedRealtime() - chronometer.base
@@ -145,17 +165,21 @@ class MainActivity : AppCompatActivity() {
             }
 
             RepeatHelper.repeatSpecifyTheCourseSpecifyTheCourse(
-                3000
+                2000
             ) {
                 tempCourse = specifyTheCourse(
                     currentTempList,
                     timeListConvert,
                     courseList,
+                    bearingList,
+                    equalsCourseForTraverse,
+                    traverseCurrentTime,
+                    traverseTime
                 )
             }
         }
         resultCourse = tempCourse
-
+//-------------------------------------------------------------------------------------
         stopBTN.setOnClickListener {
             chronometer.stop()
             chronometer.base = SystemClock.elapsedRealtime()
@@ -230,29 +254,41 @@ class MainActivity : AppCompatActivity() {
         return customText
     }
 
-
     private fun addToList(list: ArrayList<Long>, currentTime: Long) {
-//        val minutes = (currentTime / 1000 / 60 % 60).toInt()
-//        val seconds = (currentTime / 1000 % 60).toInt()
-//        val zero = "0"
-//        val customText = if (seconds < 10) {
-//            "$minutes.${zero + seconds}"
-//        } else {
-//            "$minutes.$seconds"
-//        }
         timeList.add(currentTime)
+    }
+
+    private fun specifyTheTraverse(
+        timeListForTime: ArrayList<Long>,
+        traverseCurrentTime: Long,
+        traverseTime: String
+    ) {
+        var item = timeListForTime
+        if (traverseCurrentTime - 3000 <= timeListForTime[0]) {
+            val intent = Intent(this, CreateTimeVoiceActivity::class.java)
+            intent.putExtra("Key_time", traverseTime)
+            startActivity(intent)
+        } else {
+            timeListForTime.clear()
+        }
     }
 
     private fun specifyTheCourse(
         timeList: ArrayList<Long>,
         timeListAfterConvertMil: ArrayList<Long>,
         originalCourseList: ArrayList<String>,
-    ): String {
+        bearingList: ArrayList<String>,
+        equalsCourseForTraverse: String,
+        traverseCurrentTime: Long,
+        traverseTime: String
+        ): String {
         var resultCourse = originalCourseList[0]
         var current = resultCourse
         var count = 0
+
         if (timeListAfterConvertMil.isNotEmpty()) {
             if (timeListAfterConvertMil[0] <= timeList[0]) {
+
                 originalCourseList.removeAt(0)
                 if (originalCourseList.isEmpty()) {
                     lookTimeTV.text = "256"
@@ -262,19 +298,25 @@ class MainActivity : AppCompatActivity() {
                     count++
                     if (count == 1) {
                         resultCourse = lookTimeTV.text.toString()
+                        if (lookTimeTV.text == equalsCourseForTraverse
+                            && timeListAfterConvertMil[0] == traverseCurrentTime) {
+                            resultCourse = traverseTime
+                        }
+
                     }
                 }
                 timeList.clear()
                 timeListAfterConvertMil.removeAt(0)
             } else {
                 timeList.clear()
-
             }
         }
         if (resultCourse != current) {
-            val intent = Intent(this, CourseActivity::class.java)
+            val intent = Intent(this, CreateVoiceActivity::class.java)
             intent.putExtra("Key_course", resultCourse)
+            intent.putExtra("Key_bearing", bearingList[0])
             startActivity(intent)
+            bearingList.removeAt(0)
         }
         return resultCourse
     }
