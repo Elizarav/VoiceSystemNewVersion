@@ -1,8 +1,8 @@
 package com.example.voicesystemnewversion
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -12,6 +12,12 @@ import android.widget.Chronometer
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 
 
 class MainActivity : AppCompatActivity() {
@@ -155,8 +161,16 @@ class MainActivity : AppCompatActivity() {
 
             val traverseCurrentTime = timeListAfterConvertMil[2]
             val traverseTime = timeTV3.text.toString()
-            var equalsCourseForTraverse = courseList[3]
+            val equalsCourseForTraverse = courseList[3]
+            val timeUntilTheFirst = timeTV.text.toString()
+
 //---------------------------------------------------------------------------------------
+            val thread = Thread(Runnable {
+                playVoiceTimeUntilFirst(timeUntilTheFirst)
+            })
+            thread.start()
+
+
             RepeatHelper.repeatDelayed(2000) {
                 addToList(
                     timeList,
@@ -188,6 +202,14 @@ class MainActivity : AppCompatActivity() {
 
         }
         return resultCourse
+    }
+
+    private fun playVoiceTimeUntilFirst(timeUntilTheFirst: String) {
+        val timeList = VoicePlayer.createTimePlayList(timeUntilTheFirst)
+        VoicePlayer.play(this, R.raw.timeuntilfirst)
+        for (i in timeList.indices) {
+            VoicePlayer.play(this, timeList[i])
+        }
     }
 
     private fun removeAndAddElementTimeList() {
@@ -258,21 +280,6 @@ class MainActivity : AppCompatActivity() {
         timeList.add(currentTime)
     }
 
-    private fun specifyTheTraverse(
-        timeListForTime: ArrayList<Long>,
-        traverseCurrentTime: Long,
-        traverseTime: String
-    ) {
-        var item = timeListForTime
-        if (traverseCurrentTime - 3000 <= timeListForTime[0]) {
-            val intent = Intent(this, CreateTimeVoiceActivity::class.java)
-            intent.putExtra("Key_time", traverseTime)
-            startActivity(intent)
-        } else {
-            timeListForTime.clear()
-        }
-    }
-
     private fun specifyTheCourse(
         timeList: ArrayList<Long>,
         timeListAfterConvertMil: ArrayList<Long>,
@@ -281,7 +288,7 @@ class MainActivity : AppCompatActivity() {
         equalsCourseForTraverse: String,
         traverseCurrentTime: Long,
         traverseTime: String
-        ): String {
+    ): String {
         var resultCourse = originalCourseList[0]
         var current = resultCourse
         var count = 0
@@ -299,7 +306,8 @@ class MainActivity : AppCompatActivity() {
                     if (count == 1) {
                         resultCourse = lookTimeTV.text.toString()
                         if (lookTimeTV.text == equalsCourseForTraverse
-                            && timeListAfterConvertMil[0] == traverseCurrentTime) {
+                            && timeListAfterConvertMil[0] == traverseCurrentTime
+                        ) {
                             resultCourse = traverseTime
                         }
 
@@ -310,13 +318,39 @@ class MainActivity : AppCompatActivity() {
             } else {
                 timeList.clear()
             }
+        } else {
+            lookTimeTV.text = "Полет завершен"
+            chronometer.stop()
         }
         if (resultCourse != current) {
-            val intent = Intent(this, CreateVoiceActivity::class.java)
-            intent.putExtra("Key_course", resultCourse)
-            intent.putExtra("Key_bearing", bearingList[0])
-            startActivity(intent)
-            bearingList.removeAt(0)
+            if (bearingList.isEmpty()) {
+                lookTimeTV.text = "Полет завершен"
+                chronometer.stop()
+            } else {
+                var resultBearing = bearingList[0]
+                val thread = Thread(Runnable {
+                    if (VoicePlayer.isTime(resultCourse)) {
+                        val traverseTimeList = VoicePlayer.createTimePlayList(resultCourse)
+                        VoicePlayer.play(this, R.raw.traverse)
+                        for (i in traverseTimeList.indices) {
+                            VoicePlayer.play(this, traverseTimeList[i])
+                        }
+                    } else {
+
+                        val list = VoicePlayer.createCoursePlayList(resultCourse.toString())
+                        for (i in list.indices) {
+                            VoicePlayer.play(this, list[i])
+                        }
+                    }
+                    val bearingList = VoicePlayer.createBearingPlayList(resultBearing)
+                    for (i in bearingList.indices) {
+                        VoicePlayer.play(this, bearingList[i])
+                    }
+                })
+                thread.start()
+                bearingList.removeAt(0)
+            }
+
         }
         return resultCourse
     }

@@ -2,9 +2,12 @@ package com.example.voicesystemnewversion
 
 import android.content.Context
 import android.media.MediaPlayer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class VoicePlayer {
 
@@ -31,7 +34,7 @@ class VoicePlayer {
                 7 -> R.raw.seventy
                 8 -> R.raw.eighty
                 9 -> R.raw.ninety
-                else -> R.raw.pausedsmall
+                else -> R.raw.pausedsmallxxx
             }
             return dozens
         }
@@ -52,7 +55,7 @@ class VoicePlayer {
                 17 -> R.raw.seventeen
                 18 -> R.raw.eighteen
                 19 -> R.raw.nineteen
-                else -> R.raw.pausedsmall
+                else -> R.raw.pausedsmallxxx
             }
             return result
         }
@@ -68,7 +71,7 @@ class VoicePlayer {
                 7 -> R.raw.seven
                 8 -> R.raw.eight
                 9 -> R.raw.nine
-                else -> R.raw.pausedsmall
+                else -> R.raw.pausedsmallxxx
             }
             return unit
         }
@@ -143,16 +146,15 @@ class VoicePlayer {
 
         fun createTimePlayList(time: String): ArrayList<Int> {
             val list = ArrayList<Int>()
-            list.add(R.raw.traverse)
 
             var timeString = convertStringTimeWithoutDot(time)
-            val result = when (chooseHundredVoiceOption(timeString)) {
+            val result = when (timeString.toInt() / 100) {
                 1 -> R.raw.oneminute
                 2 -> R.raw.twominute
                 3 -> R.raw.threeminute
                 4 -> R.raw.fourminute
                 5 -> R.raw.fiveminute
-                else -> R.raw.paused
+                else -> R.raw.pausedsmallxxx
             }
             list.add(result)
             if (checkDozen(timeString)) {
@@ -161,10 +163,13 @@ class VoicePlayer {
                 list.add(R.raw.second)
             } else {
                 val dozen = chooseDozensVoiceOption(timeString)
+                if (result != R.raw.pausedsmall) {
+                    list.add(R.raw.pausedsmall)
+                }
                 list.add(dozen)
 //                list.add(R.raw.paused)
                 val unit = chooseUnitVoiceOption(timeString)
-                if (unit != R.raw.paused) {
+                if (unit != R.raw.pausedsmall) {
                     list.add(unit)
 //                    list.add(R.raw.paused)
                 }
@@ -185,10 +190,9 @@ class VoicePlayer {
         ) = runBlocking {
             launch {
                 val mediaPlayer = MediaPlayer.create(context, item)
-                delay(600)
+                delay(800)
                 mediaPlayer.start()
             }
-
         }
 
     }
