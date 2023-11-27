@@ -3,6 +3,7 @@ package com.example.voicesystemnewversion
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var startBTN: Button
     private lateinit var stopBTN: Button
+    private lateinit var resetTimeBTN: Button
 
     private lateinit var lookTimeTV: TextView
     private lateinit var numberOfFlightsTV: TextView
@@ -58,14 +60,24 @@ class MainActivity : AppCompatActivity() {
 
     private val timeList = ArrayList<Long>()
     private var timeListAfterConvertMil = ArrayList<Long>()
-    private val timeListForTime = ArrayList<Long>()
+    private var timeListConvert = ArrayList<Long>()
+    private var currentTempList = ArrayList<Long>()
 
     private var originalTimeList = ArrayList<String>()
     private var originalCourseList = ArrayList<String>()
     private var originalBearingList = ArrayList<String>()
+    private var courseList = ArrayList<String>()
+    private var bearingList = ArrayList<String>()
 
-    var currentCourse = "0"
+    var traverseCurrentTime = 0L
+    var equalsCourseForTraverse = ""
+
     private var countFlight = 0
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        countOfFlightsTV.text = savedInstanceState.getString("KEY")
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
@@ -73,13 +85,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
         init()
-    }
-
-
-    override fun onResume() {
-        super.onResume()
-
         originalCourseList = mutableListOf(
             courseTV.text.toString(),
             courseTV2.text.toString(),
@@ -104,8 +111,26 @@ class MainActivity : AppCompatActivity() {
             bearingTV3.text.toString(),
             bearingTV4.text.toString()
         ) as ArrayList<String>
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+
+        timeListAfterConvertMil = convertToTimeMillis(originalTimeList)
+        timeListConvert = timeListAfterConvertMil
+        currentTempList = timeList
+        courseList = originalCourseList
+        bearingList = originalBearingList
+
+        traverseCurrentTime = timeListAfterConvertMil[2]
+        equalsCourseForTraverse = courseList[3]
 
         onClick()
+
+        resetTimeBTN.setOnClickListener {
+            recreate()
+        }
     }
 
 
@@ -131,7 +156,9 @@ class MainActivity : AppCompatActivity() {
 
         startBTN = findViewById(R.id.startTimeBTN)
         stopBTN = findViewById(R.id.stopTimeBTN)
-        lookTimeTV = findViewById(R.id.lookTimeTV)
+        resetTimeBTN = findViewById(R.id.resetTimeBTN)
+
+        lookTimeTV = findViewById(R.id.lookCourseTV)
         numberOfFlightsTV = findViewById(R.id.numberOfFlightsTV)
         countOfFlightsTV = findViewById(R.id.countOfFlightsTV)
 
@@ -147,21 +174,16 @@ class MainActivity : AppCompatActivity() {
 
         startBTN.setOnClickListener {
 
+            countFlight = countOfFlightsTV.text.toString().toInt()
             countFlight++
             countOfFlightsTV.text = countFlight.toString()
             lookTimeTV.text = tempCourse
             chronometer.base = SystemClock.elapsedRealtime()
             chronometer.start()
 
-            timeListAfterConvertMil = convertToTimeMillis(originalTimeList)
-            val timeListConvert = timeListAfterConvertMil
-            val currentTempList = timeList
-            val courseList = originalCourseList
-            val bearingList = originalBearingList
 
-            val traverseCurrentTime = timeListAfterConvertMil[2]
             val traverseTime = timeTV3.text.toString()
-            val equalsCourseForTraverse = courseList[3]
+
             val timeUntilTheFirst = timeTV.text.toString()
 
 //---------------------------------------------------------------------------------------
@@ -200,9 +222,21 @@ class MainActivity : AppCompatActivity() {
             RepeatHelper.stopHandler()
             lookTimeTV.text = ""
 
+            recreate()
+
         }
         return resultCourse
     }
+
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.run {
+            putString("KEY", countFlight.toString())
+        }
+        super.onSaveInstanceState(outState)
+    }
+
 
     private fun playVoiceTimeUntilFirst(timeUntilTheFirst: String) {
         val timeList = VoicePlayer.createTimePlayList(timeUntilTheFirst)

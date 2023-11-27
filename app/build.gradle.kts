@@ -46,4 +46,5 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+
 }

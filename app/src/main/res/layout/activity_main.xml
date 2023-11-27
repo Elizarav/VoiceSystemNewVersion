@@ -76,7 +76,7 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:padding="4dp"
-            android:text="311"
+            android:text="346"
             android:textColor="@color/black"
             android:textSize="22sp" />
 
@@ -124,7 +124,7 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:padding="4dp"
-            android:text="227"
+            android:text="76"
             android:textColor="@color/black"
             android:textSize="22sp" />
 
@@ -173,7 +173,7 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:padding="4dp"
-            android:text="227"
+            android:text="76"
             android:textColor="@color/black"
             android:textSize="22sp" />
 
@@ -221,7 +221,7 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:padding="4dp"
-            android:text="211"
+            android:text="166"
             android:textColor="@color/black"
             android:textSize="22sp" />
 
@@ -277,13 +277,23 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/lookTimeTV"
+        android:id="@+id/lookCourseTV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:gravity="center"
-        android:text="Время"
+        android:text="Курс"
         android:textSize="22sp" />
+
+    <Button
+        android:id="@+id/resetTimeBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:padding="8dp"
+        android:layout_gravity="center"
+        android:text="Сброс" />
+
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
